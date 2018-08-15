@@ -1,2 +1,3 @@
 # labels
-My default set of labels
+
+A tool to synchronize labels on GitHub repositories sanely.
