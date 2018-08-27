@@ -1,9 +1,14 @@
 package main
 
 import (
-	"github.com/nhooyr/labels/internal/cmd"
+	"flag"
 )
 
 func main() {
-	cmd.Execute()
+
+}
+
+func pull() {
+	flags := flag.NewFlagSet()
+	flags.Parse()
 }

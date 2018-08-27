@@ -1,10 +1,13 @@
+// gh is a wrapper package around github.com/google/go-github for ghlabels.
 package gh
 
 import (
 	"context"
 	"fmt"
-	"github.com/google/go-github/github"
+	"log"
 	"time"
+
+	"github.com/google/go-github/github"
 )
 
 func Repos(ctx context.Context, gc *github.Client, org string) ([]*github.Repository, error) {
@@ -37,7 +40,7 @@ func DeleteLabel(ctx context.Context, gc *github.Client, owner, repo, label stri
 	return nil
 }
 
-func EditLabel(ctx context.Context, gc *github.Client, owner, repo string, labelName string,
+func EditLabel(ctx context.Context, gc *github.Client, owner, repo, labelName string,
 	label *github.Label) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
 	defer cancel()
@@ -53,8 +56,9 @@ func CreateLabel(ctx context.Context, gc *github.Client, owner, repo string, lab
 	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
 	defer cancel()
 
-	_, _, err := gc.Issues.CreateLabel(ctx, owner, repo, label)
+	_, resp, err := gc.Issues.CreateLabel(ctx, owner, repo, label)
 	if err != nil {
+		log.Println("resp yo", resp)
 		return fmt.Errorf("failed to create label %q on repo %v/%v: %v", label.GetName(), owner, repo, err)
 	}
 	return nil
