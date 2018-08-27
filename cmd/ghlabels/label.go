@@ -1,18 +1,8 @@
 package main
 
 import (
-	"strings"
-
 	"github.com/google/go-github/github"
 )
-
-func splitRepoPath(repoPath string) (owner, repo string) {
-	s := strings.SplitN(repoPath, "/", 2)
-	if len(s) < 2 {
-		return s[0], ""
-	}
-	return s[0], s[1]
-}
 
 func makeLabels(ghlabels []*github.Label) []*label {
 	labels := make([]*label, 0, len(ghlabels))

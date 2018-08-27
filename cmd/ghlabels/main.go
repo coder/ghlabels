@@ -7,9 +7,10 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"strings"
 
-	hubgh "github.com/nhooyr/hub/github"
 	"github.com/google/go-github/github"
+	hubgh "github.com/nhooyr/hub/github"
 	"go.nhooyr.io/ghlabels/internal/gh"
 	"golang.org/x/oauth2"
 )
@@ -108,7 +109,6 @@ func push(ctx context.Context, args []string) {
 	repoPath := args[0]
 	owner, repos := expandRepoPath(ctx, gc, repoPath)
 
-
 	var labels []*label
 	d := json.NewDecoder(os.Stdin)
 	err := d.Decode(&labels)
@@ -116,12 +116,17 @@ func push(ctx context.Context, args []string) {
 		log.Fatalf("failed to decode stdin into labels: %v", err)
 	}
 
-
 	for _, repo := range repos {
 		for _, label := range labels {
 			ghlabel := label.github()
 
 			err = gh.CreateLabel(ctx, gc, owner, repo, ghlabel)
+			if err == gh.ErrAlreadyExists {
+				err = gh.EditLabel(ctx, gc, owner, repo, ghlabel.GetName(), ghlabel)
+				if err != nil {
+					log.Fatalf("failed to edit label %q on %v/%v: %v", label.Name, owner, repo, err)
+				}
+			}
 			if err != nil {
 				log.Fatalf("failed to create label %q on %v/%v: %v", label.Name, owner, repo, err)
 			}
@@ -224,4 +229,12 @@ func expandRepoPath(ctx context.Context, gc *github.Client, repoPath string) (or
 	}
 
 	return org, repos
+}
+
+func splitRepoPath(repoPath string) (owner, repo string) {
+	s := strings.SplitN(repoPath, "/", 2)
+	if len(s) < 2 {
+		return s[0], ""
+	}
+	return s[0], s[1]
 }

@@ -3,6 +3,7 @@ package gh
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -10,16 +11,32 @@ import (
 	"github.com/google/go-github/github"
 )
 
-func Repos(ctx context.Context, gc *github.Client, org string) ([]*github.Repository, error) {
+func Repos(ctx context.Context, gc *github.Client, owner string) ([]*github.Repository, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
 	defer cancel()
 
-	opts := &github.RepositoryListByOrgOptions{}
+	opts := github.ListOptions{}
 	var repos []*github.Repository
+
+	listFn := func() ([]*github.Repository, *github.Response, error) {
+		opts := &github.RepositoryListByOrgOptions{ListOptions: opts}
+		return gc.Repositories.ListByOrg(ctx, owner, opts)
+	}
+	_, _, err := gc.Organizations.Get(ctx, owner)
+	if err == nil {
+		log.Printf("detected %v as org", owner)
+	} else {
+		log.Printf("detected %v as not org; trying as user", owner)
+		listFn = func() ([]*github.Repository, *github.Response, error) {
+			opts := &github.RepositoryListOptions{ListOptions: opts}
+			return gc.Repositories.List(ctx, owner, opts)
+		}
+	}
+
 	for {
-		repos2, resp, err := gc.Repositories.ListByOrg(ctx, org, opts)
+		repos2, resp, err := listFn()
 		if err != nil {
-			return nil, fmt.Errorf("failed to list repos for %v: %v", org, err)
+			return nil, fmt.Errorf("failed to list repos for %v: %v", owner, err)
 		}
 		repos = append(repos, repos2...)
 		if resp.NextPage == 0 {
@@ -52,13 +69,22 @@ func EditLabel(ctx context.Context, gc *github.Client, owner, repo, labelName st
 	return nil
 }
 
+var ErrAlreadyExists = errors.New("label already exists")
+
 func CreateLabel(ctx context.Context, gc *github.Client, owner, repo string, label *github.Label) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
 	defer cancel()
 
-	_, resp, err := gc.Issues.CreateLabel(ctx, owner, repo, label)
+	_, _, err := gc.Issues.CreateLabel(ctx, owner, repo, label)
 	if err != nil {
-		log.Println("resp yo", resp)
+		er, ok := err.(*github.ErrorResponse)
+		if ok {
+			if len(er.Errors) > 0 {
+				if er.Errors[0].Code == "already_exists" {
+					return ErrAlreadyExists
+				}
+			}
+		}
 		return fmt.Errorf("failed to create label %q on repo %v/%v: %v", label.GetName(), owner, repo, err)
 	}
 	return nil
