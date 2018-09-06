@@ -1,4 +1,4 @@
-package main
+package ghlabels
 
 import (
 	"github.com/google/go-github/github"
