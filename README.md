@@ -66,6 +66,9 @@ You can push this to an entire organization's repos (or a single repo) via
 ghlabels push <org>[/<repo>] < labels.json 
 ```
 
+Its important to note that this will not delete labels not included in the labels.json. This is to allow
+individual repos to create their own custom labels.
+
 You can delete labels across entire organizations or repos via the `delete` subcommand.
 
 ```
