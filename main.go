@@ -49,7 +49,7 @@ Commands:
 	}
 }
 
-func newGithubClient() *github.Client {
+func githubClient() (*github.Client, *hubgh.Host) {
 	config := hubgh.CurrentConfig()
 	h, err := config.DefaultHost()
 	if err != nil {
@@ -72,7 +72,7 @@ func newGithubClient() *github.Client {
 		gc.BaseURL.Host = h.Host
 		gc.BaseURL.Path = "/api/v3/"
 	}
-	return gc
+	return gc, h
 }
 
 func pull(ctx context.Context, args []string) {
@@ -83,7 +83,7 @@ func pull(ctx context.Context, args []string) {
 		usage()
 	}
 
-	gc := newGithubClient()
+	gc, _ := githubClient()
 
 	repoPath := args[0]
 	org, repo := splitRepoPath(repoPath)
@@ -115,10 +115,10 @@ func push(ctx context.Context, args []string) {
 		usage()
 	}
 
-	gc := newGithubClient()
+	gc, h := githubClient()
 
 	repoPath := args[0]
-	owner, repos := expandRepoPath(ctx, gc, repoPath)
+	owner, repos := expandRepoPath(ctx, gc, h, repoPath)
 
 	var labels []*label
 	d := json.NewDecoder(os.Stdin)
@@ -153,13 +153,13 @@ func rename(ctx context.Context, args []string) {
 		usage()
 	}
 
-	gc := newGithubClient()
+	gc, h := githubClient()
 
 	repoPath := args[0]
 	oldLabel := args[1]
 	newLabelName := args[2]
 
-	org, repos := expandRepoPath(ctx, gc, repoPath)
+	org, repos := expandRepoPath(ctx, gc, h, repoPath)
 
 	for _, repo := range repos {
 		newLabel := &github.Label{
@@ -181,7 +181,7 @@ You must provide at least one of --defaults or <label>.`)
 	if len(args) < 2 {
 		usage()
 	}
-	gc := newGithubClient()
+	gc, h := githubClient()
 
 	fs := flag.NewFlagSet("delete", flag.ContinueOnError)
 	deleteDefaults := fs.Bool("defaults", false, "delete all default labels")
@@ -213,7 +213,7 @@ You must provide at least one of --defaults or <label>.`)
 		org = args[1]
 	}
 
-	org, repos = expandRepoPath(ctx, gc, org)
+	org, repos = expandRepoPath(ctx, gc, h, org)
 
 	for _, repo := range repos {
 		labels, err := gh.Labels(ctx, gc, org, repo)
@@ -232,10 +232,9 @@ You must provide at least one of --defaults or <label>.`)
 	}
 }
 
-func expandRepoPath(ctx context.Context, gc *github.Client, repoPath string) (org string, repos []string) {
+func expandRepoPath(ctx context.Context, gc *github.Client, h *hubgh.Host, repoPath string) (org string, repos []string) {
 	org, repo := splitRepoPath(repoPath)
 	if repo == "" {
-		h, _ := hubgh.CurrentConfig().DefaultHost()
 		var ghrepos []*github.Repository
 		var err error
 		if org == h.User {
