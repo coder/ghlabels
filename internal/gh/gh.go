@@ -5,38 +5,42 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/google/go-github/github"
 )
 
-func Repos(ctx context.Context, gc *github.Client, owner string) ([]*github.Repository, error) {
+func UserRepos(ctx context.Context, gc *github.Client) ([]*github.Repository, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
 	defer cancel()
 
-	opts := github.ListOptions{}
+	opts := &github.RepositoryListOptions{
+		Type: "owner",
+	}
 	var repos []*github.Repository
-
-	listFn := func() ([]*github.Repository, *github.Response, error) {
-		opts := &github.RepositoryListByOrgOptions{ListOptions: opts}
-		return gc.Repositories.ListByOrg(ctx, owner, opts)
-	}
-	_, _, err := gc.Organizations.Get(ctx, owner)
-	if err == nil {
-		log.Printf("detected %v as org", owner)
-	} else {
-		log.Printf("detected %v as not org; trying as user", owner)
-		listFn = func() ([]*github.Repository, *github.Response, error) {
-			opts := &github.RepositoryListOptions{ListOptions: opts}
-			return gc.Repositories.List(ctx, owner, opts)
-		}
-	}
-
 	for {
-		repos2, resp, err := listFn()
+		repos2, resp, err := gc.Repositories.List(ctx, "", opts)
 		if err != nil {
-			return nil, fmt.Errorf("failed to list repos for %v: %v", owner, err)
+			return nil, err
+		}
+		repos = append(repos, repos2...)
+		if resp.NextPage == 0 {
+			return repos, nil
+		}
+		opts.Page = resp.NextPage
+	}
+}
+
+func OrgRepos(ctx context.Context, gc *github.Client, org string) ([]*github.Repository, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
+	defer cancel()
+
+	opts := github.RepositoryListByOrgOptions{}
+	var repos []*github.Repository
+	for {
+		repos2, resp, err := gc.Repositories.ListByOrg(ctx, org, &opts)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list repos for %v: %v", org, err)
 		}
 		repos = append(repos, repos2...)
 		if resp.NextPage == 0 {
@@ -51,10 +55,7 @@ func DeleteLabel(ctx context.Context, gc *github.Client, owner, repo, label stri
 	defer cancel()
 
 	_, err := gc.Issues.DeleteLabel(ctx, owner, repo, label)
-	if err != nil {
-		return fmt.Errorf("failed to delete label %q on repo %v/%v: %v", label, owner, repo, err)
-	}
-	return nil
+	return err
 }
 
 func EditLabel(ctx context.Context, gc *github.Client, owner, repo, labelName string,
@@ -63,10 +64,7 @@ func EditLabel(ctx context.Context, gc *github.Client, owner, repo, labelName st
 	defer cancel()
 
 	_, _, err := gc.Issues.EditLabel(ctx, owner, repo, labelName, label)
-	if err != nil {
-		return fmt.Errorf("failed to edit label %q on repo %v/%v: %v", label.GetName(), owner, repo, err)
-	}
-	return nil
+	return err
 }
 
 var ErrAlreadyExists = errors.New("label already exists")
@@ -78,16 +76,13 @@ func CreateLabel(ctx context.Context, gc *github.Client, owner, repo string, lab
 	_, _, err := gc.Issues.CreateLabel(ctx, owner, repo, label)
 	if err != nil {
 		er, ok := err.(*github.ErrorResponse)
-		if ok {
-			if len(er.Errors) > 0 {
-				if er.Errors[0].Code == "already_exists" {
-					return ErrAlreadyExists
-				}
+		if ok && len(er.Errors) > 0 {
+			if er.Errors[0].Code == "already_exists" {
+				return ErrAlreadyExists
 			}
 		}
-		return fmt.Errorf("failed to create label %q on repo %v/%v: %v", label.GetName(), owner, repo, err)
 	}
-	return nil
+	return err
 }
 
 func Labels(ctx context.Context, gc *github.Client, owner, repo string) ([]*github.Label, error) {
@@ -99,7 +94,7 @@ func Labels(ctx context.Context, gc *github.Client, owner, repo string) ([]*gith
 	for {
 		labels2, resp, err := gc.Issues.ListLabels(ctx, owner, repo, opts)
 		if err != nil {
-			return nil, fmt.Errorf("failed to list labels for repo %v/%v: %v", owner, repo, err)
+			return nil, err
 		}
 		ls = append(ls, labels2...)
 		if resp.NextPage == 0 {

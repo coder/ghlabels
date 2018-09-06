@@ -5,12 +5,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"go/format"
 	"io/ioutil"
 	"log"
 	"os/exec"
 	"strings"
 	"time"
-	"go/format"
 )
 
 func main() {

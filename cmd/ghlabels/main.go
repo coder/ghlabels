@@ -9,8 +9,8 @@ import (
 	"os"
 	"strings"
 
+	hubgh "github.com/github/hub/github"
 	"github.com/google/go-github/github"
-	hubgh "github.com/nhooyr/hub/github"
 	"go.nhooyr.io/ghlabels/internal/gh"
 	"golang.org/x/oauth2"
 )
@@ -18,14 +18,17 @@ import (
 func main() {
 	log.SetFlags(0)
 
-	if len(os.Args) < 2 {
-		log.Fatal(`usage: ghlabels <sub_command> [sub_command_args_and_flags]
+	usage := func() {
+		log.Fatal(`usage: ghlabels <command> [args]
 
-sub commands:
-  pull
-  push
-  rename
-  delete`)
+Commands:
+  pull		pull labels from a repository
+  push		push labelss
+  rename	rename a label
+  delete	delete a label`)
+	}
+	if len(os.Args) < 2 {
+		usage()
 	}
 
 	ctx := context.Background()
@@ -41,7 +44,8 @@ sub commands:
 	case "delete":
 		deleteCmd(ctx, args)
 	default:
-		log.Fatal("unknown sub command")
+		log.Printf("unknown sub command")
+		usage()
 	}
 }
 
@@ -72,8 +76,11 @@ func newGithubClient() *github.Client {
 }
 
 func pull(ctx context.Context, args []string) {
-	if len(args) < 1 {
+	usage := func() {
 		log.Fatal(`usage: ghlabels pull <org>/<repo>`)
+	}
+	if len(args) < 1 {
+		usage()
 	}
 
 	gc := newGithubClient()
@@ -81,7 +88,8 @@ func pull(ctx context.Context, args []string) {
 	repoPath := args[0]
 	org, repo := splitRepoPath(repoPath)
 	if repo == "" {
-		log.Fatalf("invalid repo path %q", repoPath)
+		log.Printf("invalid repo path %q", repoPath)
+		usage()
 	}
 
 	ghlabels, err := gh.Labels(ctx, gc, org, repo)
@@ -100,8 +108,11 @@ func pull(ctx context.Context, args []string) {
 }
 
 func push(ctx context.Context, args []string) {
+	usage := func() {
+		log.Fatal(`usage: ghlabels push <owner>[/<repo>]`)
+	}
 	if len(args) < 1 {
-		log.Fatal(`usage: ghlabels push <owner>[<repo>]`)
+		usage()
 	}
 
 	gc := newGithubClient()
@@ -135,8 +146,11 @@ func push(ctx context.Context, args []string) {
 }
 
 func rename(ctx context.Context, args []string) {
+	usage := func() {
+		log.Fatalf(`usage: ghlabels rename <owner>[/<repo>] <old_name> <new_name>`)
+	}
 	if len(args) < 3 {
-		log.Fatal(`usage: ghlabels rename <owner>[/<repo>] <old_name> <new_name>`)
+		usage()
 	}
 
 	gc := newGithubClient()
@@ -159,10 +173,13 @@ func rename(ctx context.Context, args []string) {
 }
 
 func deleteCmd(ctx context.Context, args []string) {
-	if len(args) < 2 {
-		log.Fatal(`usage: ghlabels delete [--defaults] [<label>] <org>[<repo>]
+	usage := func() {
+		log.Fatalf(`usage: ghlabels delete [--defaults] [<label>] <org>[<repo>]
 
-You must provide at least one of --defaults or <label>`)
+You must provide at least one of --defaults or <label>.`)
+	}
+	if len(args) < 2 {
+		usage()
 	}
 	gc := newGithubClient()
 
@@ -170,15 +187,17 @@ You must provide at least one of --defaults or <label>`)
 	deleteDefaults := fs.Bool("defaults", false, "delete all default labels")
 	err := fs.Parse(args)
 	if err != nil {
-		log.Fatalf("failed to parse flags: %v", err)
+		log.Printf("failed to parse flags: %v", err)
+		usage()
 	}
 
 	args = fs.Args()
 	if len(args) < 1 {
-		log.Fatalf("not enough arguments")
+		usage()
 	}
 	if !*deleteDefaults && len(args) < 2 {
-		log.Fatalf("you must provide either --defaults or a label")
+		log.Printf("you must provide either --defaults or a label")
+		usage()
 	}
 
 	// This is safe even if label is never initialized because an
@@ -216,9 +235,16 @@ You must provide at least one of --defaults or <label>`)
 func expandRepoPath(ctx context.Context, gc *github.Client, repoPath string) (org string, repos []string) {
 	org, repo := splitRepoPath(repoPath)
 	if repo == "" {
-		ghrepos, err := gh.Repos(ctx, gc, org)
+		h, _ := hubgh.CurrentConfig().DefaultHost()
+		var ghrepos []*github.Repository
+		var err error
+		if org == h.User {
+			ghrepos, err = gh.UserRepos(ctx, gc)
+		} else {
+			ghrepos, err = gh.OrgRepos(ctx, gc, org)
+		}
 		if err != nil {
-			log.Fatalf("failed to list repos for org %q: %v", org, err)
+			log.Fatalf("failed to list repos for %q: %v", org, err)
 		}
 
 		for _, gr := range ghrepos {
