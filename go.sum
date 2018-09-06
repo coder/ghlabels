@@ -23,8 +23,6 @@ github.com/mattn/go-isatty v0.0.4 h1:bnP0vzxcAdeI1zdubAl5PjU6zsERjGZb7raWodagDYs
 github.com/mattn/go-isatty v0.0.4/go.mod h1:M+lRXTBqGeGNdLjl/ufCoiOlB5xdOkqRJdNxMWT7Zi4=
 github.com/mitchellh/go-homedir v1.0.0 h1:vKb8ShqSby24Yrqr/yDYkuFz8d0WUjys40rvnGC8aR0=
 github.com/mitchellh/go-homedir v1.0.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
-github.com/nhooyr/hub v2.5.2-0.20180826124604-d62428594250+incompatible h1:XYFxTjgep+E+4hcNeZxInEUUt8ax9ojacEkxFRjDZLU=
-github.com/nhooyr/hub v2.5.2-0.20180826124604-d62428594250+incompatible/go.mod h1:wiXjE+i+/HGGRzA9SKuk/brVQ+0oL31pDrMF9eRPru0=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793 h1:u+LnwYTOOW7Ukr/fppxEb1Nwz0AtPflrblfvUudpo+I=
 golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/net v0.0.0-20180811021610-c39426892332 h1:efGso+ep0DjyCBJPjvoz0HI6UldX4Md2F1rZFe1ir0E=
@@ -41,3 +39,5 @@ gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v2 v2.2.1 h1:mUhvW9EsL+naU5Q3cakzfE91YhliOondGd6ZrsDBHQE=
 gopkg.in/yaml.v2 v2.2.1/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
+nhooyr.io/hub v2.5.2-0.20180826124604-d62428594250+incompatible h1:9gyGCVyEvOMijReBEM46RyGu4aTxVYe7mejyQv9AVDI=
+nhooyr.io/hub v2.5.2-0.20180826124604-d62428594250+incompatible/go.mod h1:Yt2hZwy8tXE3p+gMQn7dVlj4OBZTtdB/yH8qMOxd/DQ=

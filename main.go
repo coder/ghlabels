@@ -11,7 +11,7 @@ import (
 
 	hubgh "github.com/github/hub/github"
 	"github.com/google/go-github/github"
-	"go.nhooyr.io/ghlabels/internal/gh"
+	"nhooyr.io/ghlabels/internal/gh"
 	"golang.org/x/oauth2"
 )
 
