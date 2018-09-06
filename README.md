@@ -2,10 +2,16 @@
 
 A tool to synchronize labels on GitHub repositories sanely.
 
-It uses the same credentials as [hub](github.com/github/hub) to access github repositories. In fact, it uses the same library
+It uses the same credentials as [hub](http://github.com/github/hub) to access github repositories. In fact, it uses the same library
 as hub so if you have multiple credentials with hub and expect to be able to select between them,
 ghlabels will offer the same prompts. If you do not have hub setup, it will prompt for the credentials
 the same way hub does.
+
+## Install
+
+```
+go get go.nhooyr.io/ghlabels
+```
 
 ## Usage
 
