@@ -10,7 +10,7 @@ the same way hub does.
 ## Install
 
 ```
-go get go.nhooyr.io/ghlabels
+go get nhooyr.io/ghlabels
 ```
 
 ## Usage
