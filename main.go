@@ -1,4 +1,4 @@
-package ghlabels
+package main
 
 import (
 	"context"
