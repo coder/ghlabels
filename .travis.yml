@@ -1,4 +1,4 @@
 language: go
 go:
 - "1.x"
-go_import_path: go.nhooyr.io/ghlabels
+go_import_path: nhooyr.io/ghlabels
