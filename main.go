@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"flag"
 	"log"
 	"net/url"
 	"os"
@@ -11,8 +10,8 @@ import (
 
 	hubgh "github.com/github/hub/github"
 	"github.com/google/go-github/github"
-	"nhooyr.io/ghlabels/internal/gh"
 	"golang.org/x/oauth2"
+	"nhooyr.io/ghlabels/internal/gh"
 )
 
 func main() {
@@ -23,9 +22,9 @@ func main() {
 
 Commands:
   pull		pull labels from a repository
-  push		push labelss
+  push		push labels
   rename	rename a label
-  delete	delete a label`)
+  delete	deletes labels`)
 	}
 	if len(os.Args) < 2 {
 		usage()
@@ -174,46 +173,20 @@ func rename(ctx context.Context, args []string) {
 
 func deleteCmd(ctx context.Context, args []string) {
 	usage := func() {
-		log.Fatalf(`usage: ghlabels delete [--defaults] [<label>] <org>[<repo>]
-
-You must provide at least one of --defaults or <label>.`)
+		log.Fatalf(`usage: ghlabels delete <org>[<repo>] [<label>] `)
 	}
-	if len(args) < 2 {
+	if len(args) < 1 {
 		usage()
 	}
 	gc, h := githubClient()
 
-	fs := flag.NewFlagSet("delete", flag.ContinueOnError)
-	deleteDefaults := fs.Bool("defaults", false, "delete all default labels")
-	err := fs.Parse(args)
-	if err != nil {
-		log.Printf("failed to parse flags: %v", err)
-		usage()
-	}
-
-	args = fs.Args()
-	if len(args) < 1 {
-		usage()
-	}
-	if !*deleteDefaults && len(args) < 2 {
-		log.Printf("you must provide either --defaults or a label")
-		usage()
-	}
-
-	// This is safe even if label is never initialized because an
-	// empty string will never match an existing label's name.
+	org := args[0]
 	var labelName string
-	var org string
-	var repos []string
-
-	if len(args) < 2 {
-		org = args[0]
-	} else {
-		labelName = args[0]
-		org = args[1]
+	if len(args) > 1 {
+		labelName = args[1]
 	}
 
-	org, repos = expandRepoPath(ctx, gc, h, org)
+	org, repos := expandRepoPath(ctx, gc, h, org)
 
 	for _, repo := range repos {
 		labels, err := gh.Labels(ctx, gc, org, repo)
@@ -222,11 +195,12 @@ You must provide at least one of --defaults or <label>.`)
 		}
 
 		for _, label := range labels {
-			if (label.GetDefault() && *deleteDefaults) || label.GetName() == labelName {
+			if label.GetName() == labelName || labelName == "" {
 				err = gh.DeleteLabel(ctx, gc, org, repo, label.GetName())
 				if err != nil {
 					log.Fatalf("failed to delete label %q in %v/%v: %v", label.GetName(), org, repo, err)
 				}
+				break
 			}
 		}
 	}
