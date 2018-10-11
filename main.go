@@ -181,7 +181,7 @@ func rename(ctx context.Context, args []string) {
 
 func deleteCmd(ctx context.Context, args []string) {
 	usage := func() {
-		log.Fatalf(`usage: ghlabels delete <org>[<repo>] [<label>] `)
+		log.Fatalf(`usage: ghlabels delete <org>[<repo>] [<label>]`)
 	}
 	if len(args) < 1 {
 		usage()
