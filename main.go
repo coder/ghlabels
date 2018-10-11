@@ -22,12 +22,12 @@ func main() {
 		log.Fatal(`usage: ghlabels <command> [args]
 
 Commands:
-  pull		pull labels from a repository
-  push		push labels
-  rename	rename a label
-  delete	deletes labels
-  help		link to docs
-  version	print the version
+  pull       pull labels from a repository
+  push       push labels
+  rename     rename a label
+  delete     deletes labels
+  help       link to docs
+  version    print the version
 `)
 	}
 	if len(os.Args) < 2 {
