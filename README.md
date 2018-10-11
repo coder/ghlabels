@@ -5,12 +5,14 @@ A tool to synchronize labels on GitHub repositories sanely.
 It uses the same credentials as [hub](http://github.com/github/hub) to access github repositories. In fact, it uses the same library
 as hub so if you have multiple credentials with hub and expect to be able to select between them,
 ghlabels will offer the same prompts. If you do not have hub setup, it will prompt for the credentials
-the same way hub does.
+the same way hub does. You will need to set `$GITHUB_HOST` before running a command for the first time
+if you are using a custom GitHub enterprise setup and have not used it already with hub. After that,
+ghlabels will prompt you to select between hosts.
 
 ## Install
 
 ```
-go get nhooyr.io/ghlabels
+go get -u nhooyr.io/ghlabels
 ```
 
 ## Usage
@@ -72,10 +74,10 @@ individual repos to create their own custom labels.
 You can delete labels across entire organizations or repos via the `delete` subcommand.
 
 ```
-ghlabels delete [--defaults] [<label>] <org>[<repo>]
+ghlabels delete <org>[<repo>] [<label>]
 ```
 
-The `--defaults` flag will delete all the default labels.
+If you do not provide a label, all the labels of the organization will be deleted.
 
 You can rename labels across entire organizations or repos via the `rename` subcommand.
 
