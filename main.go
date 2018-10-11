@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/url"
 	"os"
@@ -24,7 +25,10 @@ Commands:
   pull		pull labels from a repository
   push		push labels
   rename	rename a label
-  delete	deletes labels`)
+  delete	deletes labels
+  help		link to docs
+  version	print the version
+`)
 	}
 	if len(os.Args) < 2 {
 		usage()
@@ -42,6 +46,10 @@ Commands:
 		rename(ctx, args)
 	case "delete":
 		deleteCmd(ctx, args)
+	case "help":
+		fmt.Println("https://nhooyr.io/ghlabels")
+	case "version":
+		fmt.Printf("%q\n", revision)
 	default:
 		log.Printf("unknown sub command")
 		usage()
