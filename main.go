@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/url"
 	"os"
@@ -21,10 +22,13 @@ func main() {
 		log.Fatal(`usage: ghlabels <command> [args]
 
 Commands:
-  pull		pull labels from a repository
-  push		push labels
-  rename	rename a label
-  delete	deletes labels`)
+  pull       pull labels from a repository
+  push       push labels
+  rename     rename a label
+  delete     deletes labels
+  help       link to docs
+  version    print the version
+`)
 	}
 	if len(os.Args) < 2 {
 		usage()
@@ -42,6 +46,10 @@ Commands:
 		rename(ctx, args)
 	case "delete":
 		deleteCmd(ctx, args)
+	case "help":
+		fmt.Println("https://nhooyr.io/ghlabels")
+	case "version":
+		fmt.Printf("%q\n", revision)
 	default:
 		log.Printf("unknown sub command")
 		usage()
@@ -173,7 +181,7 @@ func rename(ctx context.Context, args []string) {
 
 func deleteCmd(ctx context.Context, args []string) {
 	usage := func() {
-		log.Fatalf(`usage: ghlabels delete <org>[<repo>] [<label>] `)
+		log.Fatalf(`usage: ghlabels delete <org>[<repo>] [<label>]`)
 	}
 	if len(args) < 1 {
 		usage()
