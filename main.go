@@ -208,7 +208,9 @@ func deleteCmd(ctx context.Context, args []string) {
 				if err != nil {
 					log.Fatalf("failed to delete label %q in %v/%v: %v", label.GetName(), org, repo, err)
 				}
-				break
+				if labelName != "" {
+					break
+				}
 			}
 		}
 	}
