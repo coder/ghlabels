@@ -21,4 +21,4 @@ require (
 	gopkg.in/yaml.v2 v2.2.1 // indirect
 )
 
-replace github.com/github/hub => nhooyr.io/hub v2.5.2-0.20180826124604-d62428594250+incompatible
+replace github.com/github/hub => github.com/nhooyr/hub v2.5.2-0.20180826124604-d62428594250+incompatible
