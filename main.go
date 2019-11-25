@@ -12,7 +12,7 @@ import (
 	hubgh "github.com/github/hub/github"
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
-	"nhooyr.io/ghlabels/internal/gh"
+	"go.coder.com/ghlabels/internal/gh"
 )
 
 func main() {
@@ -47,7 +47,7 @@ Commands:
 	case "delete":
 		deleteCmd(ctx, args)
 	case "help":
-		fmt.Println("https://nhooyr.io/ghlabels")
+		fmt.Println("https://go.coder.com/ghlabels")
 	case "version":
 		fmt.Printf("%q\n", revision)
 	default:

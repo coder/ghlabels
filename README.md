@@ -12,7 +12,7 @@ ghlabels will prompt you to select between hosts.
 ## Install
 
 ```
-go get -u nhooyr.io/ghlabels
+go get -u go.coder.com/ghlabels
 ```
 
 ## Usage

@@ -1,4 +1,4 @@
-module nhooyr.io/ghlabels
+module go.coder.com/ghlabels
 
 require (
 	github.com/BurntSushi/toml v0.3.0 // indirect
@@ -21,4 +21,4 @@ require (
 	gopkg.in/yaml.v2 v2.2.1 // indirect
 )
 
-replace github.com/github/hub => github.com/nhooyr/hub v2.5.2-0.20180826124604-d62428594250+incompatible
+go 1.13
